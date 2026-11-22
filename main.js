@@ -269,3 +269,16 @@ document.getElementById('replay').addEventListener('click', play);
 const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const start = () => (reduced ? showFinal() : play());
 document.fonts ? document.fonts.ready.then(start) : start();
+
+/* ---------- активный пункт навигации ---------- */
+const navLinks = [...document.querySelectorAll('.nav-links a')];
+const io = new IntersectionObserver(entries => {
+  for (const e of entries) {
+    if (!e.isIntersecting) continue;
+    navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id));
+  }
+}, { rootMargin: '-45% 0px -50% 0px' });
+['top', 'idea', 'program', 'join'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) io.observe(el);
+});

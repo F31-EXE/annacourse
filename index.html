@@ -7,42 +7,52 @@
   <meta name="description" content="Онлайн-курс: как дизайнеру интерьера встроить нейросети в работу — мудборды, визуализации из эскиза, презентации клиенту.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <!-- фиксированная навигация -->
   <header class="nav">
-    <a class="logo" href="#">Анна<span>/ ai interior</span></a>
+    <a class="logo" href="#top">Анна</a>
     <nav class="nav-links">
-      <a href="#how">Как это работает</a>
+      <a href="#top" class="active">Интро</a>
+      <a href="#idea">Идея</a>
       <a href="#program">Программа</a>
-      <a href="#join" class="nav-cta">Записаться</a>
+      <a href="#join">Контакт</a>
     </nav>
   </header>
 
+  <!-- вертикальная подпись по правому краю -->
+  <div class="side-label" aria-hidden="true">Анна / AI-Interior — курс 01</div>
+
   <main>
     <!-- ============ HERO ============ -->
-    <section class="hero">
+    <section class="hero" id="top">
       <div class="hero-text">
-        <p class="eyebrow">Онлайн-курс · ИИ для дизайнеров интерьера</p>
-        <h1>Из эскиза —<br><em>в готовый интерьер</em><br>за минуты</h1>
-        <p class="lead">Научу встраивать нейросети в работу дизайнера: мудборды, визуализации из скетча и презентации, после которых клиенты говорят «да». Без потери авторского почерка.</p>
+        <p class="tagline">Онлайн-курс · ИИ для дизайнеров интерьера</p>
+        <h1>Из эскиза<br>в интерьер<br>за минуты.</h1>
+
+        <div class="info-card">
+          <p class="info-head">Авторский курс Анны — практикующего дизайнера интерьера.</p>
+          <hr class="dash">
+          <ul class="stats">
+            <li><b>12</b>лет в профессии</li>
+            <li><b>140+</b>проектов</li>
+            <li><b>900</b>учеников</li>
+          </ul>
+        </div>
+
         <div class="hero-actions">
-          <a href="#program" class="btn btn-primary">Смотреть программу</a>
+          <a href="#program" class="btn btn-fill">Смотреть программу</a>
           <a href="#join" class="btn btn-ghost">Бесплатный урок</a>
         </div>
-        <ul class="stats">
-          <li><b>12</b><span>лет в профессии</span></li>
-          <li><b>140+</b><span>реализованных проектов</span></li>
-          <li><b>900</b><span>учеников</span></li>
-        </ul>
       </div>
 
       <div class="stage" id="stage">
-        <svg viewBox="0 0 800 600" role="img" aria-label="Карандашный эскиз гостиной превращается в цветной интерьер">
+        <svg viewBox="0 0 800 600" role="img" aria-label="Эскиз гостиной превращается в цветной интерьер">
           <defs>
             <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-              <path d="M20 0H0V20" fill="none" stroke="#3a3631" stroke-opacity=".06" stroke-width="1"/>
+              <path d="M20 0H0V20" fill="none" stroke="#ffedd7" stroke-opacity=".05" stroke-width="1"/>
             </pattern>
             <filter id="pencil" x="-2%" y="-2%" width="104%" height="104%">
               <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="3"/>
@@ -70,14 +80,14 @@
             <linearGradient id="gClay" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#D6C3AC"/><stop offset="1" stop-color="#B49C80"/></linearGradient>
             <radialGradient id="gGlow"><stop offset="0" stop-color="#FFE3B3" stop-opacity=".95"/><stop offset="1" stop-color="#FFE3B3" stop-opacity="0"/></radialGradient>
             <radialGradient id="gWarm" cx=".5" cy=".42" r=".65"><stop offset="0" stop-color="#FFC98E" stop-opacity=".22"/><stop offset="1" stop-color="#5A3D29" stop-opacity=".16"/></radialGradient>
-            <linearGradient id="gScan" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#9AA7E6" stop-opacity="0"/><stop offset="1" stop-color="#9AA7E6" stop-opacity=".55"/></linearGradient>
+            <linearGradient id="gScan" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffedd7" stop-opacity="0"/><stop offset="1" stop-color="#ffedd7" stop-opacity=".35"/></linearGradient>
 
             <clipPath id="windowClip"><path d="M340 340V215A60 60 0 0 1 460 215V340Z"/></clipPath>
             <clipPath id="reveal"><rect id="revealRect" x="0" y="0" width="0" height="600"/></clipPath>
           </defs>
 
-          <!-- бумага -->
-          <rect width="800" height="600" fill="#FBF8F3"/>
+          <!-- тёмный «чертёжный» фон -->
+          <rect width="800" height="600" fill="#100904"/>
           <rect width="800" height="600" fill="url(#grid)"/>
 
           <!-- слой эскиза -->
@@ -98,9 +108,9 @@
           <!-- сканер / разделитель -->
           <rect id="scan" x="-90" y="0" width="90" height="600" fill="url(#gScan)" opacity="0"/>
           <g id="divider" opacity="0">
-            <line x1="0" y1="0" x2="0" y2="600" stroke="#fff" stroke-width="2.5"/>
-            <circle cx="0" cy="300" r="19" fill="#fff" stroke="#1F1E1C" stroke-opacity=".12"/>
-            <path d="M-6 292l-7 8 7 8M6 292l7 8-7 8" fill="none" stroke="#1F1E1C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="0" y1="0" x2="0" y2="600" stroke="#ffedd7" stroke-width="2"/>
+            <circle cx="0" cy="300" r="19" fill="#100904" stroke="#ffedd7" stroke-width="1.5"/>
+            <path d="M-6 292l-7 8 7 8M6 292l7 8-7 8" fill="none" stroke="#ffedd7" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
           </g>
         </svg>
 
@@ -118,10 +128,42 @@
       </div>
     </section>
 
+    <!-- ============ REVEAL: идея ============ -->
+    <section class="reveal" id="idea">
+      <h2>Не просто<br>нейросеть.</h2>
+
+      <figure class="object" aria-hidden="true">
+        <svg viewBox="0 0 300 400">
+          <defs>
+            <linearGradient id="oSky" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#6d7f9c"/><stop offset=".5" stop-color="#e9b98a"/><stop offset="1" stop-color="#dc7a3a"/>
+            </linearGradient>
+            <radialGradient id="oHalo" cx=".5" cy=".5" r=".5">
+              <stop offset="0" stop-color="#ffb46e" stop-opacity=".35"/><stop offset="1" stop-color="#ffb46e" stop-opacity="0"/>
+            </radialGradient>
+            <linearGradient id="oRim" x1="1" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#ffedd7"/><stop offset=".5" stop-color="#6c5f51"/><stop offset="1" stop-color="#382416"/>
+            </linearGradient>
+            <clipPath id="oArch"><path d="M70 360V150A80 80 0 0 1 230 150V360Z"/></clipPath>
+          </defs>
+          <ellipse cx="160" cy="210" rx="150" ry="190" fill="url(#oHalo)"/>
+          <path d="M70 360V150A80 80 0 0 1 230 150V360Z" fill="url(#oSky)"/>
+          <g clip-path="url(#oArch)">
+            <path d="M70 300Q120 270 170 290T230 282V360H70Z" fill="#7a4a2c" opacity=".75"/>
+            <path d="M70 326Q130 304 180 318T230 312V360H70Z" fill="#3f2414" opacity=".9"/>
+          </g>
+          <path d="M150 70V360M70 228H230" stroke="#100904" stroke-width="6"/>
+          <path d="M70 360V150A80 80 0 0 1 230 150V360Z" fill="none" stroke="url(#oRim)" stroke-width="8"/>
+          <path d="M56 360H244V372H56Z" fill="#382416"/>
+        </svg>
+      </figure>
+
+      <p class="body">Это инструмент, который ускоряет ваш вкус, а&nbsp;не&nbsp;заменяет его. Вы&nbsp;остаётесь автором — нейросеть берёт на&nbsp;себя рутину и&nbsp;даёт десять вариантов там, где раньше был&nbsp;один.</p>
+    </section>
+
     <!-- ============ HOW ============ -->
     <section class="how" id="how">
-      <p class="eyebrow">Как это работает</p>
-      <h2>Ваш вкус + нейросеть = <em>скорость без компромиссов</em></h2>
+      <p class="tagline">Как это работает</p>
       <ol class="steps">
         <li>
           <span class="num">01</span>
@@ -134,42 +176,51 @@
           <p>Описываете стиль, материалы и настроение на языке, который понимает ИИ. Дам готовые формулы.</p>
         </li>
         <li>
-          <span class="num ai">03</span>
+          <span class="num">03</span>
           <h3>Рендер</h3>
-          <p>Получаете 10 вариантов за 5 минут, выбираете лучший и дорабатываете под клиента.</p>
+          <p>Получаете десять вариантов за пять минут, выбираете лучший и дорабатываете под клиента.</p>
         </li>
       </ol>
     </section>
 
     <!-- ============ PROGRAM ============ -->
     <section class="program" id="program">
-      <p class="eyebrow">Программа</p>
-      <h2>6 модулей — <em>от мудборда до презентации</em></h2>
+      <div class="program-head">
+        <h2>Шесть модулей.<br>От мудборда<br>до презентации.</h2>
+        <a href="#join" class="btn btn-ghost">Записаться</a>
+      </div>
       <div class="modules">
-        <article><span>М1</span><h3>Мудборды за 10 минут</h3><p>Midjourney и аналоги: стиль, палитра, референсы.</p></article>
-        <article><span>М2</span><h3>Рендер из эскиза</h3><p>Как сохранить геометрию скетча и получить фотореализм.</p></article>
-        <article><span>М3</span><h3>Планировки с ИИ</h3><p>Варианты зонирования и быстрые проверки идей.</p></article>
-        <article><span>М4</span><h3>Материалы и свет</h3><p>Управляем фактурами, временем суток и атмосферой.</p></article>
-        <article><span>М5</span><h3>Презентация клиенту</h3><p>Собираем убедительную подачу и закрываем правки.</p></article>
-        <article><span>М6</span><h3>ИИ в рутине</h3><p>Сметы, ТЗ, переписка — освобождаем часы на творчество.</p></article>
+        <article><span>М—01</span><h3>Мудборды за 10 минут</h3><p>Midjourney и аналоги: стиль, палитра, референсы.</p></article>
+        <article><span>М—02</span><h3>Рендер из эскиза</h3><p>Как сохранить геометрию скетча и получить фотореализм.</p></article>
+        <article><span>М—03</span><h3>Планировки с ИИ</h3><p>Варианты зонирования и быстрые проверки идей.</p></article>
+        <article><span>М—04</span><h3>Материалы и свет</h3><p>Управляем фактурами, временем суток и атмосферой.</p></article>
+        <article><span>М—05</span><h3>Презентация клиенту</h3><p>Собираем убедительную подачу и закрываем правки.</p></article>
+        <article><span>М—06</span><h3>ИИ в рутине</h3><p>Сметы, ТЗ, переписка — освобождаем часы на творчество.</p></article>
       </div>
     </section>
 
-    <!-- ============ CTA ============ -->
-    <section class="join" id="join">
-      <h2>Попробуйте бесплатно</h2>
-      <p>Первый урок и PDF «50 промптов для интерьерных рендеров» — на почту.</p>
-      <form class="join-form" onsubmit="event.preventDefault(); this.classList.add('sent');">
-        <input type="email" required placeholder="Ваш email" aria-label="Email">
-        <button class="btn btn-primary" type="submit">Получить урок</button>
-        <p class="sent-msg">Готово! Проверьте почту ✦</p>
-      </form>
+    <!-- ============ JOIN ============ -->
+    <section class="reveal join" id="join">
+      <h2>Попробуйте<br>бесплатно.</h2>
+      <div class="join-right">
+        <p class="body">Первый урок и PDF «50 промптов для интерьерных рендеров» придут на почту в течение минуты.</p>
+        <form class="join-form" onsubmit="event.preventDefault(); this.classList.add('sent');">
+          <label class="field">
+            <input type="email" required placeholder="Ваш email" aria-label="Email">
+            <button type="submit" aria-label="Получить урок">Получить →</button>
+          </label>
+          <p class="sent-msg">Готово. Проверьте почту.</p>
+        </form>
+      </div>
     </section>
   </main>
 
   <footer class="footer">
-    <span>© 2026 Анна · AI Interior</span>
-    <span>Telegram · Instagram · YouTube</span>
+    <hr class="dash">
+    <div class="footer-row">
+      <span>© 2026 Анна / AI-Interior</span>
+      <span class="credit">Telegram · Instagram · YouTube</span>
+    </div>
   </footer>
 
   <script src="main.js"></script>
