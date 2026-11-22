@@ -27,7 +27,7 @@
     idea:      { x: -.07, y: .05, s: .7,  ry: .65,  rx: .06 },
     materials: { x: 0,   y: .1,  s: .74,  ry: -.3,  rx: .08 },
     program:   { x: .55, y: .05, s: .78,  ry: .95,  rx: .08 },
-    join:      { x: 0,   y: .15, s: .7,   ry: .1,   rx: .04 },
+    join:      { x: -.06, y: .15, s: .56, ry: .1,   rx: .04 },
   };
   const MOBILE_Y = { hero: -.55, idea: .85, materials: .85, program: .85, join: .85 };
 
@@ -43,23 +43,21 @@
     }
   }
 
-  /* ---------- навигация: активный пункт ---------- */
+  /* ---------- навигация: активный пункт по секции в центре экрана ---------- */
   const navLinks = [...document.querySelectorAll('.nav-links a')];
-  const navFor = { intro: 'intro', idea: 'idea', materials: 'idea', program: 'program', join: 'join' };
-  function setActiveNav(sectionId) {
-    const target = '#' + navFor[sectionId];
-    navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === target));
+  const navSections = [...document.querySelectorAll('section[data-nav-for]')];
+  function updateNav() {
+    const mid = innerHeight / 2;
+    const sec = navSections.find(s => { const r = s.getBoundingClientRect(); return r.top <= mid && r.bottom > mid; });
+    if (!sec) return;
+    navLinks.forEach(a => a.classList.toggle('active', a.dataset.nav === sec.dataset.navFor));
   }
-
-  /* ---------- форма ---------- */
-  document.getElementById('leadForm').addEventListener('submit', e => {
-    e.preventDefault();
-    e.currentTarget.classList.add('done');
-  });
+  addEventListener('scroll', updateNav, { passive: true });
+  updateNav();
 
   /* ---------- выбор обивки ---------- */
   let chosenMat = 'leather';
-  const chips = [...document.querySelectorAll('.chip')];
+  const chips = [...document.querySelectorAll('#materials .chip')];
   chips.forEach(chip => chip.addEventListener('click', () => {
     chosenMat = chip.dataset.mat;
     chips.forEach(c => c.setAttribute('aria-checked', String(c === chip)));
@@ -81,16 +79,7 @@
   let activeSection = null;
   let regenerate = () => {};
 
-  if (!renderer) {
-    const update = () => {
-      const mid = scrollY + innerHeight / 2;
-      const sec = sections.reduce((a, b) => Math.abs(center(b) - mid) < Math.abs(center(a) - mid) ? b : a);
-      setActiveNav(sec.id);
-    };
-    addEventListener('scroll', update, { passive: true });
-    update();
-    return;
-  }
+  if (!renderer) return;
 
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -311,7 +300,6 @@
   function onSection(sec) {
     if (sec === activeSection) return;
     activeSection = sec;
-    setActiveNav(sec.id);
     regenerate(sec.dataset.mat === 'choice' ? chosenMat : sec.dataset.mat);
   }
 
@@ -329,15 +317,24 @@
   addEventListener('resize', resize);
   resize();
 
-  /* ---------- пауза, пока кресло закрыто блоком генерации ---------- */
+  /* ---------- пауза, пока кресло закрыто «сплошными» секциями ---------- */
+  const solids = [...document.querySelectorAll('section.solid')];
   let hidden = false;
-  const genSection = document.getElementById('gen');
-  if (genSection) {
-    new IntersectionObserver(([e]) => {
-      hidden = e.intersectionRatio > .6 || (e.isIntersecting && e.intersectionRect.height > innerHeight * .9);
+  function updateHidden() {
+    let covered = 0;
+    for (const s of solids) {
+      const r = s.getBoundingClientRect();
+      covered += Math.max(0, Math.min(r.bottom, innerHeight) - Math.max(r.top, 0));
+    }
+    const h = covered > innerHeight * .92;
+    if (h !== hidden) {
+      hidden = h;
       canvas.style.visibility = promptEl.style.visibility = haloEl.style.visibility = hidden ? 'hidden' : '';
-    }, { threshold: [0, .3, .6, .9, 1] }).observe(genSection);
+    }
   }
+  addEventListener('scroll', updateHidden, { passive: true });
+  addEventListener('resize', updateHidden);
+  updateHidden();
 
   /* ---------- цикл ---------- */
   const cur = { ...POSES.hero };

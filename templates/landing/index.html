@@ -1,0 +1,316 @@
+{% load static %}<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Нейросети для дизайнеров интерьера — курс Анны Самариной</title>
+  <meta name="description" content="Онлайн-курс Анны Самариной: Nano Banana Pro, Midjourney, ChatGPT, Flux, Krea и Veo 3.1 в работе дизайнера интерьера — концепции, коллажи, скетчи, бетонная коробка, рум-туры.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tenor+Sans&family=Cormorant+Garamond:ital,wght@1,400;1,500&family=Manrope:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+  <!-- 3D-сцена: одно кресло на весь сайт -->
+  <div class="halo" id="halo" aria-hidden="true"></div>
+  <canvas id="scene" aria-hidden="true"></canvas>
+  <div class="fallback-chair" aria-hidden="true"></div>
+  <p class="prompt" id="prompt" aria-live="polite"></p>
+
+  <header class="nav">
+    <a class="logo" href="#intro">Анна Самарина</a>
+    <nav class="nav-links">
+      <a href="#intro" data-nav="intro">Интро</a>
+      <a href="#program" data-nav="program">Программа</a>
+      <a href="#gen" data-nav="gen">Кейсы</a>
+      <a href="#contacts" data-nav="contacts">Контакты</a>
+    </nav>
+  </header>
+
+  <div class="side-label" aria-hidden="true">Нейросети для дизайнеров интерьера</div>
+
+  <main>
+    <!-- ============ HERO ============ -->
+    <section class="hero" id="intro" data-pose="hero" data-mat="boucle" data-nav-for="intro">
+      <div class="hero-lockup">
+        <p class="label">Онлайн-курс Анны Самариной · нейросети для дизайнеров интерьера</p>
+        <h1>Одна форма.<br>Сотня<br>вариантов.</h1>
+        <p class="label tools">Nano Banana Pro · Midjourney · ChatGPT · Flux · Krea · Veo 3.1</p>
+        <div class="actions">
+          <a class="btn-ghost" href="#program">Смотреть программу</a>
+          <a class="btn-ghost" href="#join">Бесплатный урок</a>
+        </div>
+      </div>
+
+      <aside class="info-card">
+        <p class="label">Анна Самарина — дизайнер интерьера, руководитель студии «Молоко интерьер».</p>
+        <hr class="dash">
+        <ul class="stats">
+          <li><b>2022</b>лауреат Interia Awards</li>
+          <li><b>6</b>тем курса</li>
+          <li><b>6+</b>нейросетей</li>
+        </ul>
+      </aside>
+
+      <a class="preview-card" href="#video">
+        <span class="preview-mark">Рум-тур</span>
+        <span class="play" aria-hidden="true">▶</span>
+        <span class="micro">Видео из урока · Veo 3.1</span>
+      </a>
+    </section>
+
+    <!-- ============ ИДЕЯ ============ -->
+    <section class="reveal" id="idea" data-pose="idea" data-mat="velvet" data-nav-for="intro">
+      <h2>Не просто<br>нейросеть.</h2>
+      <div class="spacer" aria-hidden="true"></div>
+      <p class="body">Это ваш новый инструмент, как карандаш или 3ds Max. Форму, пропорции и замысел задаёте вы. Nano Banana, Midjourney и&nbsp;Flux за&nbsp;секунды примеряют к&nbsp;ним ткани, фактуры, свет и&nbsp;настроение.</p>
+    </section>
+
+    <!-- ============ ОБИВКА ============ -->
+    <section class="reveal" id="materials" data-pose="materials" data-mat="choice" data-nav-for="intro">
+      <div class="col">
+        <h2>Форму<br>задаёте вы.</h2>
+        <p class="body">Варианты — работа ИИ. Выберите обивку и посмотрите, как одно кресло попадает в&nbsp;четыре разных интерьера.</p>
+      </div>
+      <div class="spacer" aria-hidden="true"></div>
+      <div class="col chips-col">
+        <p class="label">Обивка</p>
+        <div class="chips" role="radiogroup" aria-label="Обивка кресла">
+          <button class="chip" role="radio" aria-checked="false" data-mat="boucle">Букле</button>
+          <button class="chip" role="radio" aria-checked="false" data-mat="velvet">Бархат</button>
+          <button class="chip" role="radio" aria-checked="true" data-mat="leather">Кожа</button>
+          <button class="chip" role="radio" aria-checked="false" data-mat="linen">Лён</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ АВТОР ============ -->
+    <section class="solid author" id="author" data-nav-for="intro">
+      <figure class="author-photo">
+        <img src="{% static 'img/author.jpg' %}" alt="Анна Самарина в интерьере" loading="lazy" width="799" height="1100">
+      </figure>
+      <div class="author-text">
+        <p class="label">Автор курса</p>
+        <h2>Анна<br>Самарина.</h2>
+        <p class="body">Дизайнер интерьера, руководитель студии «Молоко интерьер». Учит коллег встраивать нейросети в&nbsp;работу над проектом — от первой концепции до&nbsp;видео для клиента.</p>
+        <ul class="facts">
+          <li>
+            <span class="n">Премия</span>
+            <p>Лауреат BEST RUSSIAN INTERIORS · INTERIA AWARDS MODERN HOME 2022 — номинация «Исторические стилистики, квартира от&nbsp;100&nbsp;м²».</p>
+          </li>
+          <li>
+            <span class="n">Пресса</span>
+            <p>Проекты студии публикуются в&nbsp;интерьерных журналах мирового уровня: Elle Decoration, AD Magazine, Interior + Design.</p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ ПРОГРАММА ============ -->
+    <section class="program" id="program" data-pose="program" data-mat="linen" data-nav-for="program">
+      <div class="program-list">
+        <p class="label">Программа · {{ modules|length }} тем</p>
+        <h2>От концепции<br>до рум-тура.</h2>
+        <ol class="rows">
+          {% for m in modules %}
+          <li>
+            <span class="n">{{ forloop.counter|stringformat:"02d" }}</span>
+            <h3>{{ m.title }}</h3>
+            {% if m.tools %}<p class="tools-line">{{ m.tools }}</p>{% endif %}
+            {% if m.description %}<p>{{ m.description }}</p>{% endif %}
+            {% if m.prompt %}<p class="row-prompt">/{{ m.prompt }}</p>{% endif %}
+          </li>
+          {% endfor %}
+        </ol>
+      </div>
+    </section>
+
+    <!-- ============ ФОРМУЛА ПРОМПТА ============ -->
+    <section class="solid formula" id="formula" data-nav-for="program">
+      <div class="formula-text">
+        <p class="label">Тема 01 · Krea · Nano Banana · Flux · Midjourney</p>
+        <h2>Формула<br>промпта.</h2>
+        <ol class="formula-steps">
+          <li><span>1</span>Тип помещения</li>
+          <li><span>2</span>Любимый дизайнер или архитектор</li>
+          <li><span>3</span>Что мы должны увидеть в помещении</li>
+          <li><span>4</span>Материал пола</li>
+          <li><span>5</span>Материал стен</li>
+          <li><span>6</span>Оттенки интерьера</li>
+        </ol>
+      </div>
+      <div class="concepts">
+        <img src="{% static 'img/concept-1.jpg' %}" alt="Концепция интерьера: лестница, серо-голубые оттенки" loading="lazy" width="900" height="900">
+        <img src="{% static 'img/concept-2.jpg' %}" alt="Концепция интерьера: гостиная с лестницей и гобеленом" loading="lazy" width="900" height="900">
+        <img src="{% static 'img/concept-3.jpg' %}" alt="Концепция интерьера: светлая гостиная с панорамными окнами" loading="lazy" width="900" height="900">
+        <p class="micro concepts-cap">Концепции, сгенерированные по формуле промпта</p>
+      </div>
+    </section>
+
+    <!-- ============ КЕЙСЫ: ИСХОДНИК → РЕНДЕР ============ -->
+    <section class="solid gen" id="gen" data-nav-for="gen">
+      <div class="gen-text">
+        <p class="label">Кейсы из курса · Nano Banana</p>
+        <h2>Было —<br>стало.</h2>
+        <div class="chips gen-tabs" role="tablist" aria-label="Кейсы">
+          <button class="chip" role="tab" aria-selected="true" aria-checked="true"
+                  data-before="{% static 'img/case-collage-before.jpg' %}" data-after="{% static 'img/case-collage-after.jpg' %}"
+                  data-label="Коллаж" data-prompt="/сделай интерьерную визуализацию, вдохновлённую этим коллажем">Коллаж</button>
+          <button class="chip" role="tab" aria-selected="false" aria-checked="false"
+                  data-before="{% static 'img/case-sketch-before.jpg' %}" data-after="{% static 'img/case-sketch-after.jpg' %}"
+                  data-label="Болванка" data-prompt="/сделай реалистичную визуализацию из этого скетча">Скетч</button>
+          <button class="chip" role="tab" aria-selected="false" aria-checked="false"
+                  data-before="{% static 'img/case-swap-before.jpg' %}" data-after="{% static 'img/case-swap-after.jpg' %}"
+                  data-label="Было" data-prompt="/замени ковёр на другой">Замена материала</button>
+          <button class="chip" role="tab" aria-selected="false" aria-checked="false"
+                  data-before="{% static 'img/case-box-before.jpg' %}" data-after="{% static 'img/case-box-after.jpg' %}"
+                  data-label="Бетон" data-prompt="/покажи эту комнату после ремонта, сохрани пропорции и расположение окна, стиль ваби-саби">Бетонная коробка</button>
+        </div>
+        <div class="gen-status">
+          <p class="gen-prompt" id="genPrompt"></p>
+          <div class="gen-meter"><span id="genBar"></span></div>
+          <p class="micro gen-step" id="genStep">Ожидание</p>
+        </div>
+        <button class="btn-ghost" id="genReplay" type="button">Сгенерировать ещё раз</button>
+      </div>
+
+      <figure class="gen-frame" id="genFrame">
+        <canvas id="genCanvas" aria-label="Исходник превращается в фотореалистичный рендер"></canvas>
+        <span class="gen-tag gen-tag-l">ИИ-рендер</span>
+        <span class="gen-tag gen-tag-r" id="genLabel">Коллаж</span>
+        <div class="gen-handle" id="genHandle" role="slider" tabindex="0" aria-label="Сравнить исходник и рендер" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"></div>
+        <p class="gen-missing micro">Изображения не загрузились</p>
+      </figure>
+    </section>
+
+    <!-- ============ ВИДЕО ============ -->
+    <section class="solid video" id="video" data-nav-for="gen">
+      <div class="video-text">
+        <p class="label">Тема 06 · Veo 3.1</p>
+        <h2>Рум-тур<br>без съёмочной<br>группы.</h2>
+        <p class="body">Из одной визуализации — видео, в&nbsp;котором ведущая показывает интерьер, рассказывает о&nbsp;проекте по-русски и&nbsp;садится на&nbsp;диван.</p>
+        <p class="row-prompt">/сделай презентацию интерьера, рум-тур, девушка в джинсах презентует интерьерный дизайн на русском языке, говорит «короткий текст». В конце садится на диван</p>
+      </div>
+      <div class="video-frames">
+        <figure><img src="{% static 'img/video-1.jpg' %}" alt="Кадр видео: ведущая идёт по гостиной" loading="lazy" width="600" height="800"><figcaption class="micro">Кадр 01</figcaption></figure>
+        <figure><img src="{% static 'img/video-2.jpg' %}" alt="Кадр видео: ведущая сидит на диване" loading="lazy" width="600" height="800"><figcaption class="micro">Кадр 02</figcaption></figure>
+      </div>
+    </section>
+
+    {% if tariffs %}
+    <!-- ============ ТАРИФЫ ============ -->
+    <section class="solid pricing" id="pricing" data-nav-for="contacts">
+      <p class="label">Стоимость</p>
+      <h2>Тарифы.</h2>
+      <div class="tariffs">
+        {% for t in tariffs %}
+        <article class="tariff{% if t.is_featured %} featured{% endif %}">
+          <h3>{{ t.name }}</h3>
+          <p class="price">{{ t.price|floatformat:"0g" }} ₽{% if t.old_price %} <s>{{ t.old_price|floatformat:"0g" }} ₽</s>{% endif %}</p>
+          {% if t.feature_list %}
+          <ul>{% for f in t.feature_list %}<li>{{ f }}</li>{% endfor %}</ul>
+          {% endif %}
+          <button class="{% if t.is_featured %}btn-fill{% else %}btn-ghost{% endif %} buy" type="button"
+                  data-tariff="{{ t.pk }}" data-name="{{ t.name }}" data-price="{{ t.price|floatformat:'0g' }}">Купить</button>
+        </article>
+        {% endfor %}
+      </div>
+    </section>
+
+    <dialog class="order-dialog" id="orderDialog">
+      <form class="order-form" id="orderForm" method="post" action="{% url 'order_create' %}">
+        {% csrf_token %}
+        <input type="hidden" name="tariff" id="orderTariff">
+        <p class="label">Оформление заказа</p>
+        <h3 id="orderTitle">Тариф</h3>
+        <label class="field"><input name="name" required placeholder="Имя" autocomplete="name"></label>
+        <label class="field"><input name="email" type="email" required placeholder="Email" autocomplete="email"></label>
+        <label class="field"><input name="phone" placeholder="Телефон" autocomplete="tel"></label>
+        <label class="field"><input name="promo" id="orderPromo" placeholder="Промокод"></label>
+        <p class="micro order-total" id="orderTotal"></p>
+        <p class="micro order-error" id="orderError" hidden></p>
+        <div class="order-actions">
+          <button class="btn-fill" type="submit">Оформить</button>
+          <button class="btn-ghost" type="button" id="orderClose">Закрыть</button>
+        </div>
+        <p class="body order-done" id="orderDone" hidden>Заказ принят. Мы свяжемся с&nbsp;вами по&nbsp;почте, чтобы отправить ссылку на&nbsp;оплату.</p>
+      </form>
+    </dialog>
+    {% endif %}
+
+    <!-- ============ ЗАПИСЬ ============ -->
+    <section class="reveal join" id="join" data-pose="join" data-mat="boucle" data-nav-for="contacts">
+      <h2>Начните<br>с первого<br>урока.</h2>
+      <div class="spacer" aria-hidden="true"></div>
+      <div class="col">
+        <p class="body">Оставьте почту — пришлём бесплатный урок и&nbsp;расскажем о&nbsp;старте потока.</p>
+        <form class="field-form" id="leadForm" method="post" action="{% url 'lead_create' %}">
+          {% csrf_token %}
+          <input type="hidden" name="source" value="free-lesson">
+          <label class="field">
+            <input type="email" name="email" required placeholder="Ваш email" aria-label="Email" autocomplete="email">
+            <button type="submit">Получить урок →</button>
+          </label>
+          <p class="sent micro">Готово. Проверьте почту.</p>
+          <p class="micro form-error" hidden>Не получилось отправить. Попробуйте ещё раз.</p>
+        </form>
+        {% if tariffs %}
+        <a class="btn-fill" href="#pricing">Выбрать тариф</a>
+        {% else %}
+        <a class="btn-fill" href="https://t.me/moloko_interior" target="_blank" rel="noopener">Написать Анне в Telegram</a>
+        {% endif %}
+      </div>
+    </section>
+
+    <!-- ============ КОНТАКТЫ ============ -->
+    <section class="solid contacts" id="contacts" data-nav-for="contacts">
+      <div class="contact-col">
+        <p class="label">Контакты</p>
+        <h2>Молоко<br>интерьер.</h2>
+        <ul class="contact-list">
+          <li><span>Telegram</span><a href="https://t.me/moloko_interior" target="_blank" rel="noopener">@moloko_interior</a></li>
+          <li><span>Instagram*</span><a href="https://instagram.com/moloko_interior" target="_blank" rel="noopener">@moloko_interior</a></li>
+          <li><span>ВКонтакте</span>Молоко интерьер</li>
+          <li><span>MAX</span>Молоко интерьер — Анна Самарина</li>
+          <li><span>Телефон</span><a href="tel:+79089017732">+7 (908) 901-77-32</a></li>
+          <li><span>Почта</span><a href="mailto:samarina-design@yandex.ru">samarina-design@yandex.ru</a></li>
+          <li><span>Сайт</span><a href="https://moloko-interior.ru" target="_blank" rel="noopener">moloko-interior.ru</a></li>
+        </ul>
+      </div>
+
+      <div class="contact-col">
+        <p class="label">Я открыта к сотрудничеству</p>
+        <ol class="collab">
+          <li><span>01</span>Вместе сделаем проект</li>
+          <li><span>02</span>Придумаем что-то невероятное</li>
+          <li><span>03</span>Здесь могут быть ваши идеи</li>
+        </ol>
+      </div>
+
+      <div class="contact-col partners">
+        <p class="label">Партнёры</p>
+        <div class="partner">
+          <h3>Verlab</h3>
+          <p>Обучение нейросетям для дизайнеров. Скидка 10% по&nbsp;промокоду «Moloko_10» — написать Гене в&nbsp;Telegram @gp54A.</p>
+          <a class="micro" href="https://t.me/verlab" target="_blank" rel="noopener">@verlab</a>
+        </div>
+        <div class="partner">
+          <h3>Plumit</h3>
+          <p>Установка дизайнерских программ (3ds Max, Archicad и&nbsp;др.), сборка компьютеров для дизайнеров, разработка сайтов.</p>
+          <p class="micro">Илья · <a href="tel:+79224007453">+7 922 400-74-53</a> · <a href="mailto:info@plumit.ru">info@plumit.ru</a> · <a href="https://plumit.ru" target="_blank" rel="noopener">plumit.ru</a></p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span class="micro">© 2026 Анна Самарина · Молоко интерьер</span>
+    <span class="micro disclaimer">*Instagram — проект Meta Platforms Inc., деятельность которой в России запрещена</span>
+  </footer>
+
+  <script src="{% static 'vendor/three.min.js' %}"></script>
+  <script src="{% static 'main.js' %}"></script>
+  <script src="{% static 'gen.js' %}"></script>
+  <script src="{% static 'forms.js' %}"></script>
+</body>
+</html>

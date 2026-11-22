@@ -1,5 +1,5 @@
-/* Блок «Из коллажа — в рендер»: рендер мягко «распускается» поверх коллажа
-   несколькими акварельными пятнами и одновременно наводится на резкость.
+/* Блок «Было — стало»: несколько кейсов (вкладки). Рендер мягко «распускается»
+   поверх исходника акварельными пятнами и одновременно наводится на резкость.
    Потом можно сравнить слайдером. */
 
 (() => {
@@ -13,7 +13,9 @@
   const replay = document.getElementById('genReplay');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  const PROMPT = '/рендер из коллажа · фотореализм · мягкий дневной свет · сохранить геометрию';
+  const labelEl = document.getElementById('genLabel');
+  const tabs = [...document.querySelectorAll('.gen-tabs .chip')];
+  let PROMPT = '';
   const STEPS = 30;
   const GEN_MS = 4600;
 
@@ -191,7 +193,7 @@
     setCompare(false);
     state.p = 0; state.split = 1;
     bar.style.width = '0%';
-    stepEl.textContent = 'Читаю коллаж…';
+    stepEl.textContent = 'Читаю исходник…';
     draw();
     await typePrompt(id);
     if (id !== runId) return;
@@ -243,19 +245,52 @@
 
   /* ---------- старт ---------- */
   addEventListener('resize', resize);
-  Promise.all([load('img/collage.jpg'), load('img/render.jpg')])
-    .then(([a, b]) => {
+  const cache = new Map();
+  const loadCase = tab => {
+    if (!cache.has(tab)) cache.set(tab, Promise.all([load(tab.dataset.before), load(tab.dataset.after)]));
+    return cache.get(tab);
+  };
+
+  let seen = false;     // блок уже попадал в экран
+  async function selectCase(tab, play) {
+    tabs.forEach(t => {
+      const on = t === tab;
+      t.setAttribute('aria-selected', String(on));
+      t.setAttribute('aria-checked', String(on));
+    });
+    runId++;
+    try {
+      const [a, b] = await loadCase(tab);
+      if (tab.getAttribute('aria-selected') !== 'true') return;   // уже выбрали другой кейс
       collage = a; render = b;
+      PROMPT = tab.dataset.prompt;
+      labelEl.textContent = tab.dataset.label;
+      frame.classList.remove('missing');
+      replay.hidden = false;
+      frame.style.aspectRatio = `${b.width} / ${b.height}`;
+      state.p = 0; setCompare(false);
+      promptEl.textContent = '';
       resize();
-      // запуск, когда блок попадает в экран
-      const io = new IntersectionObserver(entries => {
-        if (entries.some(e => e.isIntersecting)) { io.disconnect(); run(); }
-      }, { threshold: .45 });
-      io.observe(frame);
-    })
-    .catch(() => {
+      if (play) run();
+    } catch {
       frame.classList.add('missing');
       replay.hidden = true;
       stepEl.textContent = 'Нет изображений';
-    });
+    }
+  }
+  tabs.forEach(tab => tab.addEventListener('click', () => selectCase(tab, seen)));
+  // соседние кейсы подгружаем заранее, когда браузер свободен
+  const idle = window.requestIdleCallback || (fn => setTimeout(fn, 1500));
+
+  selectCase(tabs[0], false).then(() => {
+    const io = new IntersectionObserver(entries => {
+      if (entries.some(e => e.isIntersecting)) {
+        io.disconnect();
+        seen = true;
+        run();
+        idle(() => tabs.slice(1).forEach(loadCase));
+      }
+    }, { threshold: .45 });
+    io.observe(frame);
+  });
 })();
