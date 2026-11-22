@@ -1,284 +1,336 @@
-/* Hero: эскиз комнаты прорисовывается карандашом, затем «ИИ» превращает его в рендер.
-   Геометрия описана один раз и используется для обоих слоёв. */
+/* Одна арка на весь сайт: поворачивается и переезжает по прокрутке,
+   а при смене секции «перегенерируется» в новом материале. См. DESIGN.md. */
 
-const NS = 'http://www.w3.org/2000/svg';
-const W = 800;
+(() => {
+  const promptEl = document.getElementById('prompt');
+  const haloEl = document.getElementById('halo');
+  const canvas = document.getElementById('scene');
+  const sections = [...document.querySelectorAll('[data-pose]')];
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-const ell = (cx, cy, rx, ry) =>
-  `M${cx - rx} ${cy}a${rx} ${ry} 0 1 0 ${2 * rx} 0a${rx} ${ry} 0 1 0 ${-2 * rx} 0Z`;
+  /* ---------- материалы ---------- */
+  const MATS = {
+    plaster:    { base: '#e4d6c2', rough: .95, key: '#ffe2c4', prompt: '/форма: арка · материал: штукатурка · свет: утро' },
+    travertine: { base: '#d6c09c', rough: .8,  key: '#ffbf8f', prompt: '/материал: травертин · свет: закат' },
+    walnut:     { base: '#6a4428', rough: .5,  key: '#ffd8b0', prompt: '/материал: орех · фактура: масло · свет: вечер' },
+    terracotta: { base: '#b4552f', rough: .9,  key: '#ffd0a0', prompt: '/материал: терракота · настроение: средиземноморье' },
+  };
 
-// перспективные линии пола сходятся в точку схода (400, 260)
-const planks = [240, 280, 320, 360, 400, 440, 480, 520, 560]
-  .map(x => `M${x} 400L${(400 + (x - 400) * 2.4286).toFixed(1)} 600`).join('');
+  /* ---------- позиции арки по секциям ----------
+     x — доля половины ширины экрана, y — мировые единицы, s — масштаб, ry/rx — поворот */
+  const POSES = {
+    hero:      { x: .42, y: -.05, s: 1,   ry: -.55, rx: .1 },
+    idea:      { x: 0,   y: -.05, s: .95, ry: .62,  rx: .04 },
+    materials: { x: 0,   y: 0,    s: 1,   ry: -.32, rx: .04 },
+    program:   { x: .52, y: -.05, s: .82, ry: .9,   rx: .06 },
+    join:      { x: 0,   y: .05,  s: .72, ry: 0,    rx: 0 },
+  };
+  const MOBILE_Y = { hero: -.62, idea: .78, materials: .78, program: .78, join: .78 };
 
-/* sk: 'line' — рисуется штрихом, 'faint' — вспомогательная линия, false — только в рендере
-   r: атрибуты для слоя рендера, false — только в эскизе */
-const SHAPES = [
-  // построение
-  { d: 'M0 260H800', sk: 'faint', r: false },
-  { d: 'M400 260L0 0M400 260L800 0M400 260L0 600M400 260L800 600', sk: 'faint', r: false },
-  { d: 'M200 108H600M200 102V114M600 102V114', sk: 'faint', r: false },
-
-  // комната
-  { d: 'M0 0H800L600 120H200Z', r: { fill: 'url(#gCeil)' } },
-  { d: 'M0 0L200 120V400L0 600Z', r: { fill: 'url(#gLeft)' } },
-  { d: 'M800 0L600 120V400L800 600Z', r: { fill: 'url(#gRight)' } },
-  { d: 'M200 120H600V400H200Z', r: { fill: 'url(#gBack)' } },
-  { d: 'M200 400H600L800 600H0Z', r: { fill: 'url(#gFloor)' } },
-  { d: planks, sk: 'faint', r: { fill: 'none', stroke: '#3d2616', 'stroke-opacity': .22, 'stroke-width': 1 } },
-  { d: 'M200 393H600', sk: false, r: { stroke: '#F7F1E8', 'stroke-width': 6, fill: 'none' } },
-
-  // окно-арка
-  { d: 'M340 340V215A60 60 0 0 1 460 215V340Z', r: { fill: 'url(#gSky)' } },
-  { d: 'M340 312Q372 290 404 304T460 298V340H340Z', sk: false, r: { fill: '#C79F7E', opacity: .55, 'clip-path': 'url(#windowClip)' } },
-  { d: 'M340 326Q380 312 420 322T460 318V340H340Z', sk: false, r: { fill: '#A87E61', opacity: .55, 'clip-path': 'url(#windowClip)' } },
-  { d: 'M400 155V340M340 262H460', r: { stroke: '#F8F3EC', 'stroke-width': 4, fill: 'none' } },
-  { d: 'M340 340V215A60 60 0 0 1 460 215V340Z', sk: false, r: { fill: 'none', stroke: '#F8F3EC', 'stroke-width': 7 } },
-  { d: 'M332 340H468V348H332Z', r: { fill: '#F8F3EC' } },
-
-  // картина на левой стене
-  { d: 'M58 168L152 213V302L58 322Z', r: { fill: '#6B4A33' } },
-  { d: 'M68 184L142 220V294L68 310Z', r: { fill: 'url(#gArt)' } },
-  { d: 'M78 268Q100 230 132 250', r: { fill: 'none', stroke: '#F4E6D4', 'stroke-width': 3, 'stroke-linecap': 'round' } },
-
-  // полка и вазы на правой стене
-  { d: 'M648 214L740 168V177L648 223Z', r: { fill: 'url(#gWood)' } },
-  { d: 'M664 207Q658 194 666 180H676Q684 194 678 205Z', r: { fill: '#F2ECE3' } },
-  { d: 'M692 194V172Q699 166 706 172V188Z', r: { fill: '#C2613F' } },
-
-  // свет из окна на полу
-  { d: 'M342 400H458L590 590H220Z', sk: false, r: { fill: 'url(#gBeam)' } },
-
-  // ковёр
-  { d: 'M190 440H610L700 560H100Z', r: { fill: '#ECE2D2' } },
-  { d: 'M214 451H586L664 549H136Z', r: { fill: 'none', stroke: '#C2613F', 'stroke-width': 1.5, opacity: .7 } },
-
-  // тени
-  { d: ell(400, 424, 175, 12), sk: false, r: { fill: '#2b1a0e', opacity: .35, filter: 'url(#soft)' } },
-  { d: ell(400, 534, 95, 10), sk: false, r: { fill: '#2b1a0e', opacity: .3, filter: 'url(#soft)' } },
-  { d: ell(146, 542, 40, 7), sk: false, r: { fill: '#2b1a0e', opacity: .35, filter: 'url(#soft)' } },
-
-  // диван
-  { d: 'M250 416V428M550 416V428', r: { stroke: '#4a3322', 'stroke-width': 4, fill: 'none', 'stroke-linecap': 'round' } },
-  { d: 'M250 330Q250 318 262 318H538Q550 318 550 330V372H250Z', r: { fill: 'url(#gLinen)' } },
-  { d: 'M240 372H560V408Q560 416 552 416H248Q240 416 240 408Z', r: { fill: 'url(#gSeat)' } },
-  { d: 'M228 350Q228 338 240 338H258V416H236Q228 416 228 408Z', r: { fill: 'url(#gLinen)' } },
-  { d: 'M572 350Q572 338 560 338H542V416H564Q572 416 572 408Z', r: { fill: 'url(#gLinen)' } },
-  { d: 'M400 374V412', r: { stroke: '#a8967e', 'stroke-width': 1.2, fill: 'none' } },
-  { d: 'M280 370Q274 342 290 334L332 330Q342 350 337 370Z', r: { fill: '#C2613F' } },
-  { d: 'M468 368Q464 342 478 332L518 336Q526 352 520 370Z', r: { fill: '#8A9A7B' } },
-  { d: 'M330 370Q328 350 340 344L372 342Q378 356 374 372Z', r: { fill: '#EFE7DA' } },
-
-  // растение
-  { d: 'M146 470Q108 420 94 378Q140 410 146 470Z', r: { fill: '#5E7A55' } },
-  { d: 'M146 470Q152 400 140 346Q178 400 146 470Z', r: { fill: '#7C9A6E' } },
-  { d: 'M146 470Q186 420 208 394Q192 452 146 470Z', r: { fill: '#55704C' } },
-  { d: 'M146 470Q118 442 78 440Q118 474 146 470Z', r: { fill: '#86A378' } },
-  { d: 'M146 470Q168 430 186 360Q196 420 146 470Z', r: { fill: '#6A8A5F' } },
-  { d: 'M120 470H172L164 540H128Z', r: { fill: 'url(#gClay)' } },
-
-  // журнальный столик
-  { d: 'M345 494L338 532M455 494L462 532M400 500V540', r: { stroke: '#4d3322', 'stroke-width': 4, fill: 'none', 'stroke-linecap': 'round' } },
-  { d: 'M310 478V487A90 18 0 0 0 490 487V478Z', r: { fill: '#4d3322' } },
-  { d: ell(400, 478, 90, 18), r: { fill: 'url(#gWood)' } },
-  { d: 'M362 474H412V466H362Z', r: { fill: '#EFE7DA' } },
-  { d: 'M366 466H408V460H366Z', r: { fill: '#C2613F' } },
-  { d: 'M426 474Q418 460 428 446H438Q448 460 440 474Z', r: { fill: '#F2ECE3' } },
-  { d: 'M433 446Q428 420 442 402M434 432Q446 426 452 414', r: { fill: 'none', stroke: '#6A5040', 'stroke-width': 1.5, 'stroke-linecap': 'round' } },
-
-  // торшер
-  { d: ell(610, 300, 70, 70), sk: false, r: { fill: 'url(#gGlow)' } },
-  { d: ell(666, 546, 26, 6), r: { fill: '#2f2a24' } },
-  { d: 'M666 546V300Q666 246 610 244', r: { fill: 'none', stroke: '#B8935A', 'stroke-width': 3.5, 'stroke-linecap': 'round' } },
-  { d: 'M586 252H634L624 226H596Z', r: { fill: '#F4E9D6' } },
-
-  // тёплый общий свет
-  { d: 'M0 0H800V600H0Z', sk: false, r: { fill: 'url(#gWarm)' } },
-  { d: 'M0 0H800V600H0Z', sk: false, r: { filter: 'url(#grain)', fill: '#000' } },
-];
-
-const PROMPT = '/imagine japandi living room, linen sofa, oak floor, warm sunset light, terracotta accents';
-
-/* ---------- построение ---------- */
-const svg = document.querySelector('#stage svg');
-const gSketch = svg.querySelector('#sketch');
-const gRender = svg.querySelector('#render');
-const revealRect = svg.querySelector('#revealRect');
-const scan = svg.querySelector('#scan');
-const divider = svg.querySelector('#divider');
-const notes = svg.querySelector('#notes');
-const stage = document.getElementById('stage');
-const status = document.getElementById('status');
-const statusText = document.getElementById('statusText');
-const promptEl = document.getElementById('prompt');
-const handleZone = document.getElementById('handleZone');
-
-const strokes = [];
-for (const s of SHAPES) {
-  if (s.sk !== false) {
-    const p = document.createElementNS(NS, 'path');
-    p.setAttribute('d', s.d);
-    if (s.sk === 'faint') p.classList.add('faint');
-    gSketch.appendChild(p);
-    strokes.push(p);
+  /* ---------- строка промпта ---------- */
+  let typingId = 0;
+  async function typePrompt(text) {
+    const id = ++typingId;
+    if (reduced) { promptEl.textContent = text; return; }
+    for (let i = 0; i <= text.length; i++) {
+      if (id !== typingId) return;
+      promptEl.textContent = text.slice(0, i);
+      await new Promise(r => setTimeout(r, 16));
+    }
   }
-  if (s.r) {
-    const p = document.createElementNS(NS, 'path');
-    p.setAttribute('d', s.d);
-    for (const [k, v] of Object.entries(s.r)) p.setAttribute(k, v);
-    gRender.appendChild(p);
+
+  /* ---------- навигация: активный пункт ---------- */
+  const navLinks = [...document.querySelectorAll('.nav-links a')];
+  const navFor = { intro: 'intro', idea: 'idea', materials: 'idea', program: 'program', join: 'join' };
+  function setActiveNav(sectionId) {
+    const target = '#' + navFor[sectionId];
+    navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === target));
   }
-}
 
-/* ---------- утилиты анимации ---------- */
-let runId = 0;
-const sleep = ms => new Promise(r => setTimeout(r, ms));
-const ease = t => (t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+  /* ---------- форма ---------- */
+  document.getElementById('leadForm').addEventListener('submit', e => {
+    e.preventDefault();
+    e.currentTarget.classList.add('done');
+  });
 
-function tween(from, to, ms, onUpdate, id) {
-  return new Promise(resolve => {
-    const t0 = performance.now();
-    const step = now => {
-      if (id !== runId) return resolve();
-      const t = Math.min(1, (now - t0) / ms);
-      onUpdate(from + (to - from) * ease(t));
-      t < 1 ? requestAnimationFrame(step) : resolve();
+  /* ---------- выбор материала ---------- */
+  let chosenMat = 'walnut';
+  const chips = [...document.querySelectorAll('.chip')];
+  chips.forEach(chip => chip.addEventListener('click', () => {
+    chosenMat = chip.dataset.mat;
+    chips.forEach(c => c.setAttribute('aria-checked', String(c === chip)));
+    if (activeSection && activeSection.dataset.mat === 'choice') regenerate(chosenMat);
+  }));
+
+  /* ---------- 3D ---------- */
+  let renderer;
+  try {
+    if (!window.THREE) throw new Error('three.js не загрузился');
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  } catch (err) {
+    document.documentElement.classList.add('no-3d');
+    console.warn('3D недоступно:', err.message);
+  }
+
+  let activeSection = null;
+  let regenerate = () => {};
+
+  if (!renderer) {
+    // без WebGL — только навигация
+    const update = () => {
+      const mid = scrollY + innerHeight / 2;
+      const sec = sections.reduce((a, b) => Math.abs(center(b) - mid) < Math.abs(center(a) - mid) ? b : a);
+      setActiveNav(sec.id);
     };
-    requestAnimationFrame(step);
-  });
-}
+    addEventListener('scroll', update, { passive: true });
+    update();
+    return;
+  }
 
-function setSplit(x) {
-  x = Math.max(0, Math.min(W, x));
-  revealRect.setAttribute('width', x);
-  divider.setAttribute('transform', `translate(${x} 0)`);
-  scan.setAttribute('x', x - 90);
-  handleZone.setAttribute('aria-valuenow', Math.round((x / W) * 100));
-  current = x;
-}
-let current = 0;
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
 
-function setStatus(text, mode) {
-  statusText.textContent = text;
-  status.classList.remove('ai', 'done');
-  if (mode) status.classList.add(mode);
-}
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(30, 1, .1, 100);
+  camera.position.set(0, .7, 9);
+  camera.lookAt(0, 0, 0);
 
-/* ---------- сценарий ---------- */
-function resetSketch() {
-  for (const p of strokes) {
-    p.getAnimations().forEach(a => a.cancel());
-    if (p.classList.contains('faint')) {
-      p.style.opacity = 0;
-    } else {
-      const len = p.getTotalLength();
-      p.style.strokeDasharray = len;
-      p.style.strokeDashoffset = len;
+  // свет: тёплый ключ сверху справа, контровой сзади, мягкая заливка слева
+  scene.add(new THREE.AmbientLight('#ffe6cc', .45));
+  const key = new THREE.DirectionalLight('#ffe2c4', 2.6);
+  key.position.set(4, 5, 5);
+  scene.add(key);
+  const rim = new THREE.DirectionalLight('#ffa860', 3.2);
+  rim.position.set(3.5, 3, -5);
+  scene.add(rim);
+  const fill = new THREE.DirectionalLight('#ffe9d6', .35);
+  fill.position.set(-5, 0, 3);
+  scene.add(fill);
+
+  /* процедурные текстуры */
+  function rand(seed) { return () => (seed = (seed * 16807) % 2147483647) / 2147483647; }
+  function makeTexture(kind, base) {
+    const c = document.createElement('canvas');
+    c.width = c.height = 512;
+    const g = c.getContext('2d');
+    const r = rand(kind.length * 7919);
+    g.fillStyle = base;
+    g.fillRect(0, 0, 512, 512);
+
+    const speckle = (n, alpha, size) => {
+      for (let i = 0; i < n; i++) {
+        g.fillStyle = r() > .5 ? `rgba(255,255,255,${alpha})` : `rgba(40,20,10,${alpha})`;
+        g.fillRect(r() * 512, r() * 512, size, size);
+      }
+    };
+    const blotch = (n, alpha, rmax) => {
+      for (let i = 0; i < n; i++) {
+        const x = r() * 512, y = r() * 512, rad = 20 + r() * rmax;
+        const grd = g.createRadialGradient(x, y, 0, x, y, rad);
+        const dark = r() > .5;
+        grd.addColorStop(0, dark ? `rgba(60,30,15,${alpha})` : `rgba(255,245,230,${alpha})`);
+        grd.addColorStop(1, 'rgba(0,0,0,0)');
+        g.fillStyle = grd;
+        g.fillRect(x - rad, y - rad, rad * 2, rad * 2);
+      }
+    };
+
+    if (kind === 'plaster') {
+      blotch(40, .06, 120);
+      speckle(16000, .05, 1.5);
     }
-  }
-}
-
-async function play() {
-  const id = ++runId;
-  stage.classList.remove('interactive');
-  notes.classList.remove('show');
-  divider.setAttribute('opacity', 0);
-  scan.setAttribute('opacity', 0);
-  promptEl.textContent = '';
-  setSplit(0);
-  resetSketch();
-  setStatus('Рисуем эскиз…');
-
-  // 1. карандашный эскиз
-  let delay = 0;
-  const anims = strokes.map(p => {
-    let a;
-    if (p.classList.contains('faint')) {
-      a = p.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 700, delay, fill: 'forwards' });
-      delay += 40;
-    } else {
-      const len = parseFloat(p.style.strokeDasharray);
-      const dur = Math.min(1100, 380 + len * 0.7);
-      a = p.animate([{ strokeDashoffset: len }, { strokeDashoffset: 0 }],
-        { duration: dur, delay, easing: 'cubic-bezier(.45,.05,.35,1)', fill: 'forwards' });
-      delay += 75;
+    if (kind === 'travertine') {
+      for (let y = 0; y < 512; y += 2 + r() * 6) {
+        g.fillStyle = r() > .5 ? `rgba(255,248,235,${.08 + r() * .1})` : `rgba(120,90,55,${.05 + r() * .12})`;
+        g.fillRect(0, y, 512, 1 + r() * 3);
+      }
+      for (let i = 0; i < 260; i++) {
+        g.fillStyle = `rgba(90,65,40,${.15 + r() * .25})`;
+        g.beginPath();
+        g.ellipse(r() * 512, r() * 512, 1 + r() * 5, .6 + r() * 1.4, 0, 0, Math.PI * 2);
+        g.fill();
+      }
+      speckle(5000, .04, 1);
     }
-    return a.finished.catch(() => {});
+    if (kind === 'walnut') {
+      g.lineWidth = 1.2;
+      for (let i = 0; i < 140; i++) {
+        const x0 = r() * 512, amp = 3 + r() * 10, f = .008 + r() * .02, ph = r() * 6;
+        g.strokeStyle = r() > .35 ? `rgba(30,15,6,${.12 + r() * .25})` : `rgba(210,160,110,${.08 + r() * .12})`;
+        g.beginPath();
+        for (let y = 0; y <= 512; y += 8) g.lineTo(x0 + Math.sin(y * f + ph) * amp, y);
+        g.stroke();
+      }
+    }
+    if (kind === 'terracotta') {
+      blotch(60, .1, 90);
+      speckle(9000, .07, 1.5);
+    }
+
+    const tex = new THREE.CanvasTexture(c);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(.55, .55);
+    tex.anisotropy = 4;
+    return tex;
+  }
+  const TEX = Object.fromEntries(Object.entries(MATS).map(([k, m]) => [k, makeTexture(k, m.base)]));
+
+  /* геометрия арки: портал с полукруглым верхом */
+  const shape = new THREE.Shape();
+  const R = .86, H = 1.5, r = .5, h = 1.36;
+  shape.moveTo(-R, 0);
+  shape.lineTo(-R, H);
+  shape.absarc(0, H, R, Math.PI, 0, true);
+  shape.lineTo(R, 0);
+  shape.lineTo(r, 0);
+  shape.lineTo(r, h);
+  shape.absarc(0, h, r, 0, Math.PI, false);
+  shape.lineTo(-r, 0);
+  shape.closePath();
+
+  const depth = .42;
+  const archGeo = new THREE.ExtrudeGeometry(shape, {
+    depth, curveSegments: 64, bevelEnabled: true,
+    bevelThickness: .025, bevelSize: .025, bevelSegments: 3,
   });
-  setTimeout(() => id === runId && notes.classList.add('show'), delay * 0.55);
-  await Promise.all(anims);
-  if (id !== runId) return;
+  archGeo.translate(0, -1.12, -depth / 2);
 
-  // 2. промпт
-  setStatus('ИИ читает эскиз', 'ai');
-  for (let i = 1; i <= PROMPT.length; i++) {
-    if (id !== runId) return;
-    promptEl.textContent = PROMPT.slice(0, i);
-    await sleep(16);
+  const archMat = new THREE.MeshStandardMaterial({ map: TEX.plaster, roughness: MATS.plaster.rough, metalness: 0 });
+  const arch = new THREE.Mesh(archGeo, archMat);
+
+  const plinth = new THREE.Mesh(
+    new THREE.BoxGeometry(2.3, .16, .95),
+    new THREE.MeshStandardMaterial({ color: '#2a1a0f', roughness: .75 })
+  );
+  plinth.position.y = -1.12 - .08 - .025;
+
+  const group = new THREE.Group();
+  group.add(arch, plinth);
+  scene.add(group);
+
+  /* смена материала: оборот на 360°, текстура меняется на середине */
+  let currentMat = null;
+  let pendingMat = null;
+  let spin = null; // { t0, swapped }
+  const SPIN_MS = 900;
+
+  function applyMat(name) {
+    archMat.map = TEX[name];
+    archMat.roughness = MATS[name].rough;
+    archMat.needsUpdate = true;
+    key.color.set(MATS[name].key);
   }
-  await sleep(250);
+  regenerate = name => {
+    if (name === currentMat && !spin) return;
+    if (spin) { pendingMat = name; return; }
+    currentMat = name;
+    typePrompt(MATS[name].prompt);
+    if (reduced) { applyMat(name); return; }
+    spin = { t0: performance.now(), swapped: false };
+  };
 
-  // 3. генерация — сканер проходит по эскизу
-  setStatus('Генерирую рендер…', 'ai');
-  scan.setAttribute('opacity', 1);
-  divider.setAttribute('opacity', 1);
-  await tween(0, W, 2600, setSplit, id);
-  if (id !== runId) return;
-  scan.setAttribute('opacity', 0);
-  setStatus('Готово · 4,2 сек', 'done');
-  await sleep(900);
+  /* ---------- прокрутка → поза ---------- */
+  function center(sec) { return sec.offsetTop + sec.offsetHeight / 2; }
+  const smooth = t => t * t * (3 - 2 * t);
+  const lerp = (a, b, t) => a + (b - a) * t;
 
-  // 4. сравнение
-  await tween(W, W * 0.6, 900, setSplit, id);
-  if (id !== runId) return;
-  stage.classList.add('interactive');
-}
-
-function showFinal() {
-  runId++;
-  for (const p of strokes) { p.style.strokeDasharray = 'none'; p.style.opacity = ''; }
-  notes.classList.add('show');
-  divider.setAttribute('opacity', 1);
-  setSplit(W * 0.6);
-  stage.classList.add('interactive');
-}
-
-/* ---------- перетаскивание ---------- */
-function toSvgX(clientX) {
-  const pt = svg.createSVGPoint();
-  pt.x = clientX; pt.y = 0;
-  return pt.matrixTransform(svg.getScreenCTM().inverse()).x;
-}
-let dragging = false;
-handleZone.addEventListener('pointerdown', e => {
-  dragging = true;
-  handleZone.setPointerCapture(e.pointerId);
-  setSplit(toSvgX(e.clientX));
-});
-handleZone.addEventListener('pointermove', e => dragging && setSplit(toSvgX(e.clientX)));
-handleZone.addEventListener('pointerup', () => { dragging = false; });
-handleZone.addEventListener('keydown', e => {
-  const step = e.shiftKey ? 80 : 20;
-  if (e.key === 'ArrowLeft') { setSplit(current - step); e.preventDefault(); }
-  if (e.key === 'ArrowRight') { setSplit(current + step); e.preventDefault(); }
-});
-
-document.getElementById('replay').addEventListener('click', play);
-
-/* ---------- старт ---------- */
-const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-const start = () => (reduced ? showFinal() : play());
-document.fonts ? document.fonts.ready.then(start) : start();
-
-/* ---------- активный пункт навигации ---------- */
-const navLinks = [...document.querySelectorAll('.nav-links a')];
-const io = new IntersectionObserver(entries => {
-  for (const e of entries) {
-    if (!e.isIntersecting) continue;
-    navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id));
+  let isMobile = false;
+  function poseFor(sec) {
+    const p = { ...POSES[sec.dataset.pose] };
+    if (isMobile) { p.x = 0; p.y = MOBILE_Y[sec.dataset.pose]; p.s *= .62; }
+    return p;
   }
-}, { rootMargin: '-45% 0px -50% 0px' });
-['top', 'idea', 'program', 'join'].forEach(id => {
-  const el = document.getElementById(id);
-  if (el) io.observe(el);
-});
+
+  function targetPose() {
+    const mid = scrollY + innerHeight / 2;
+    const cs = sections.map(center);
+    let i = 0;
+    while (i < cs.length - 1 && mid > cs[i + 1]) i++;
+    const a = poseFor(sections[i]);
+    if (i === cs.length - 1 || mid <= cs[0]) return { pose: a, near: sections[i] };
+    const b = poseFor(sections[i + 1]);
+    // держим позу у центра секции, двигаемся в промежутке
+    let t = (mid - cs[i]) / (cs[i + 1] - cs[i]);
+    t = smooth(Math.min(1, Math.max(0, (t - .2) / .6)));
+    const pose = {};
+    for (const k in a) pose[k] = lerp(a[k], b[k], t);
+    return { pose, near: t < .5 ? sections[i] : sections[i + 1] };
+  }
+
+  function onSection(sec) {
+    if (sec === activeSection) return;
+    activeSection = sec;
+    setActiveNav(sec.id);
+    const m = sec.dataset.mat === 'choice' ? chosenMat : sec.dataset.mat;
+    regenerate(m);
+  }
+
+  /* ---------- размеры ---------- */
+  let halfW = 1, halfH = 1;
+  function resize() {
+    const w = innerWidth, h = innerHeight;
+    isMobile = w < 900;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    halfH = camera.position.z * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+    halfW = halfH * camera.aspect;
+  }
+  addEventListener('resize', resize);
+  resize();
+
+  /* ---------- цикл ---------- */
+  const cur = { ...POSES.hero };
+  let first = true;
+  const v = new THREE.Vector3();
+
+  function toScreen(local) {
+    v.copy(local);
+    group.localToWorld(v);
+    v.project(camera);
+    return [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight];
+  }
+
+  function frame(now) {
+    const { pose, near } = targetPose();
+    onSection(near);
+
+    const k = first ? 1 : .09;
+    first = false;
+    for (const key in cur) cur[key] = lerp(cur[key], pose[key], k);
+
+    let spinAngle = 0;
+    if (spin) {
+      const t = Math.min(1, (now - spin.t0) / SPIN_MS);
+      spinAngle = smooth(t) * Math.PI * 2;
+      if (!spin.swapped && t >= .5) { applyMat(currentMat); spin.swapped = true; }
+      if (t >= 1) {
+        spin = null;
+        if (pendingMat && pendingMat !== currentMat) { const m = pendingMat; pendingMat = null; regenerate(m); }
+        else pendingMat = null;
+      }
+    }
+
+    const breath = reduced ? 0 : Math.sin(now / 1600) * .05;
+    const sway = reduced ? 0 : Math.sin(now / 2600) * .06;
+    group.position.set(cur.x * halfW, cur.y + breath, 0);
+    group.scale.setScalar(cur.s);
+    group.rotation.set(cur.rx, cur.ry + sway + spinAngle, 0);
+
+    renderer.render(scene, camera);
+
+    // ореол и строка промпта следуют за объектом
+    const [hx, hy] = toScreen(new THREE.Vector3(0, .1, 0));
+    haloEl.style.transform = `translate(${hx}px, ${hy}px)`;
+    const [px, py] = toScreen(new THREE.Vector3(0, -1.3, .5));
+    const pw = promptEl.offsetWidth;
+    const x = Math.min(Math.max(px - pw / 2, 16), innerWidth - pw - 16);
+    promptEl.style.transform = `translate(${x}px, ${py + 16}px)`;
+
+    requestAnimationFrame(frame);
+  }
+
+  applyMat('plaster');
+  requestAnimationFrame(frame);
+})();
