@@ -1,5 +1,6 @@
-/* Блок «Из коллажа — в рендер»: коллаж проявляется в рендер как в диффузионной модели —
-   от крупных пикселей и шума к чёткой картинке. Потом можно сравнить слайдером. */
+/* Блок «Из коллажа — в рендер»: рендер мягко «распускается» поверх коллажа
+   несколькими акварельными пятнами и одновременно наводится на резкость.
+   Потом можно сравнить слайдером. */
 
 (() => {
   const frame = document.getElementById('genFrame');
@@ -14,7 +15,7 @@
 
   const PROMPT = '/рендер из коллажа · фотореализм · мягкий дневной свет · сохранить геометрию';
   const STEPS = 30;
-  const GEN_MS = 3800;
+  const GEN_MS = 4600;
 
   const load = src => new Promise((res, rej) => {
     const img = new Image();
@@ -26,28 +27,30 @@
   let collage, render;
   let W = 0, H = 0;
   const state = { p: 0, split: 1, compare: false };
-  const off = document.createElement('canvas');
-  const offCtx = off.getContext('2d');
-  const noise = document.createElement('canvas');
-  noise.width = 160; noise.height = 120;
-  const noiseCtx = noise.getContext('2d');
+  const layer = document.createElement('canvas');   // рендер с размытием и маской
+  const layerCtx = layer.getContext('2d');
+  const mask = document.createElement('canvas');    // маска проявления, в 1/4 разрешения
+  const maskCtx = mask.getContext('2d');
+  const small = document.createElement('canvas');   // запасной путь размытия
+  const smallCtx = small.getContext('2d');
+  const hasFilter = typeof layerCtx.filter === 'string';
 
-  function reseedNoise() {
-    const img = noiseCtx.createImageData(noise.width, noise.height);
-    for (let i = 0; i < img.data.length; i += 4) {
-      const v = Math.random() * 255;
-      img.data[i] = img.data[i + 1] = img.data[i + 2] = v;
-      img.data[i + 3] = 255;
-    }
-    noiseCtx.putImageData(img, 0, 0);
-  }
+  // точки, из которых «распускается» рендер: [x, y, задержка]
+  const SEEDS = [
+    [.5, .5, 0], [.24, .58, .1], [.77, .56, .06], [.36, .22, .18],
+    [.66, .2, .14], [.5, .9, .22], [.1, .2, .28], [.92, .86, .3],
+  ];
+  const clamp01 = x => Math.min(1, Math.max(0, x));
+  const smoothstep = t => t * t * (3 - 2 * t);
 
   function resize() {
     const dpr = Math.min(devicePixelRatio || 1, 2);
     W = Math.round(frame.clientWidth * dpr);
     H = Math.round(frame.clientHeight * dpr);
-    canvas.width = W;
-    canvas.height = H;
+    canvas.width = layer.width = W;
+    canvas.height = layer.height = H;
+    mask.width = Math.ceil(W / 4);
+    mask.height = Math.ceil(H / 4);
     draw();
   }
 
@@ -97,26 +100,49 @@
     const p = state.p;
     if (p <= 0) return;
 
-    // «шаги диффузии»: пиксель крупный в начале и исчезает к концу
-    const block = Math.max(1, Math.round(64 * Math.pow(1 - p, 2.2)));
-    const ow = Math.ceil(W / block), oh = Math.ceil(H / block);
-    off.width = ow; off.height = oh;
-    offCtx.imageSmoothingEnabled = true;
-    cover(render, offCtx, ow, oh);
-    ctx.imageSmoothingEnabled = block <= 1;
-    ctx.globalAlpha = Math.min(1, p / .22);
-    ctx.drawImage(off, 0, 0, ow, oh, 0, 0, W, H);
-
-    // шум, который «вычищается» к последнему шагу
-    const n = .5 * Math.pow(1 - p, 1.4);
-    if (n > .01) {
-      ctx.imageSmoothingEnabled = false;
-      ctx.globalCompositeOperation = 'overlay';
-      ctx.globalAlpha = n;
-      ctx.drawImage(noise, 0, 0, W, H);
+    // 1. рендер с размытием, которое уходит к концу (наводка на резкость)
+    const blur = 18 * Math.pow(1 - p, 1.6) * (W / 1000);
+    layerCtx.globalCompositeOperation = 'source-over';
+    layerCtx.clearRect(0, 0, W, H);
+    if (blur < .3) {
+      cover(render, layerCtx, W, H);
+    } else if (hasFilter) {
+      layerCtx.filter = `blur(${blur.toFixed(1)}px)`;
+      cover(render, layerCtx, W, H);
+      layerCtx.filter = 'none';
+    } else {
+      // без ctx.filter: уменьшаем и плавно растягиваем обратно
+      const f = 1 + blur / 2;
+      small.width = Math.ceil(W / f); small.height = Math.ceil(H / f);
+      smallCtx.imageSmoothingEnabled = true;
+      cover(render, smallCtx, small.width, small.height);
+      layerCtx.imageSmoothingEnabled = true;
+      layerCtx.drawImage(small, 0, 0, W, H);
     }
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.globalAlpha = 1;
+
+    // 2. маска: мягкие пятна растут из нескольких точек
+    if (p < 1) {
+      const mw = mask.width, mh = mask.height, diag = Math.hypot(mw, mh);
+      maskCtx.clearRect(0, 0, mw, mh);
+      for (const [sx, sy, delay] of SEEDS) {
+        const t = smoothstep(clamp01((p - delay) / (1 - delay)));
+        if (t <= 0) continue;
+        const r = t * diag * .9;
+        const gr = maskCtx.createRadialGradient(sx * mw, sy * mh, 0, sx * mw, sy * mh, r);
+        gr.addColorStop(0, 'rgba(0,0,0,1)');
+        gr.addColorStop(.5, 'rgba(0,0,0,.9)');
+        gr.addColorStop(1, 'rgba(0,0,0,0)');
+        maskCtx.fillStyle = gr;
+        maskCtx.fillRect(0, 0, mw, mh);
+      }
+      layerCtx.globalCompositeOperation = 'destination-in';
+      layerCtx.imageSmoothingEnabled = true;
+      layerCtx.drawImage(mask, 0, 0, W, H);
+      layerCtx.globalCompositeOperation = 'source-over';
+    }
+
+    // 3. проявленный рендер поверх коллажа
+    ctx.drawImage(layer, 0, 0);
   }
 
   /* ---------- анимация ---------- */
@@ -170,17 +196,12 @@
     await typePrompt(id);
     if (id !== runId) return;
 
-    let lastStep = -1;
     await tween(GEN_MS, t => {
       const step = Math.min(STEPS, Math.floor(t * STEPS) + 1);
-      if (step !== lastStep) {           // картинка обновляется по шагам, как у генератора
-        lastStep = step;
-        reseedNoise();
-        state.p = ease(step / STEPS);
-        stepEl.textContent = `Генерация · шаг ${step} / ${STEPS}`;
-        draw();
-      }
+      stepEl.textContent = `Генерация · шаг ${step} / ${STEPS}`;
       bar.style.width = `${Math.round(t * 100)}%`;
+      state.p = t;
+      draw();
     }, id);
     if (id !== runId) return;
     state.p = 1;
