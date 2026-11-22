@@ -28,6 +28,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html { scroll-behavior: smooth; }
 body {
   margin: 0;
@@ -69,11 +70,11 @@ h2 { font-size: var(--text-h); line-height: 1.06; }
 .prompt::after { content: "▍"; margin-left: 2px; animation: blink 1s steps(1) infinite; }
 @keyframes blink { 50% { opacity: 0; } }
 
-.fallback-arch { display: none; }
-.no-3d .fallback-arch {
-  display: block; position: fixed; z-index: 0; right: 16vw; top: 22vh;
-  width: 18vw; height: 28vw; border-radius: 9vw 9vw 0 0;
-  border: 3vw solid #e4d6c2; border-bottom: 0; opacity: .9;
+.fallback-chair { display: none; }
+.no-3d .fallback-chair {
+  display: block; position: fixed; z-index: 0; right: 14vw; top: 30vh;
+  width: 24vw; height: 16vw; border-radius: 12vw 12vw 5vw 5vw;
+  background: radial-gradient(circle at 60% 30%, #f6eee2, #cdbfa6); opacity: .9;
 }
 .no-3d .prompt { display: none; }
 
@@ -173,7 +174,38 @@ section:first-child { border-top: 0; }
 .rows h3 { font-size: var(--text-h-sm); line-height: 1.09; }
 .rows p { font-size: var(--text-sub); line-height: 1.3; font-weight: 400; text-transform: none; color: rgba(255, 237, 215, .72); }
 
-/* 5. Запись */
+/* 5. Коллаж → рендер (перекрывает 3D-кресло своим фоном) */
+.gen {
+  position: relative; z-index: 3; background: var(--walnut);
+  display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+  gap: 41px; align-items: center;
+}
+.gen-text { display: flex; flex-direction: column; gap: 31px; align-items: flex-start; }
+.gen-status { width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 10px; }
+.gen-prompt { color: var(--ember); min-height: 2.4em; line-height: 1.2; }
+.gen-meter { height: 1px; background: var(--cork); }
+.gen-meter span { display: block; height: 100%; width: 0; background: var(--cream); }
+.gen-step { color: var(--driftwood); }
+
+.gen-frame {
+  position: relative; margin: 0; aspect-ratio: 4 / 3;
+  border-radius: var(--r-card); overflow: hidden; border: 1px solid var(--cork); background: #1a120b;
+}
+.gen-frame canvas { display: block; width: 100%; height: 100%; }
+.gen-tag {
+  position: absolute; top: 14px; padding: 6px 12px; border-radius: var(--r-ghost);
+  border: 1px solid var(--cream); background: rgba(16, 9, 4, .6); font-size: var(--text-micro);
+  opacity: 0; transition: opacity .4s;
+}
+.gen-tag-l { left: 14px; }
+.gen-tag-r { right: 14px; }
+.gen-handle { position: absolute; inset: 0; cursor: ew-resize; display: none; touch-action: pan-y; }
+.gen-frame.compare .gen-tag { opacity: 1; }
+.gen-frame.compare .gen-handle { display: block; }
+.gen-missing { display: none; position: absolute; inset: 0; place-items: center; color: var(--driftwood); text-align: center; padding: var(--gutter); }
+.gen-frame.missing .gen-missing { display: grid; }
+
+/* 6. Запись */
 .field-form { width: 100%; max-width: 440px; }
 .field { display: flex; align-items: center; border-bottom: 1px solid var(--cream); }
 .field input {
@@ -201,7 +233,9 @@ section:first-child { border-top: 0; }
 @media (max-width: 900px) {
   :root { --text-body: 22px; --text-h: 34px; --edge: 32px; --gutter: 16px; }
   section { min-height: auto; }
-  /* арка висит в верхней части экрана, текст — ниже */
+  .gen { grid-template-columns: minmax(0, 1fr); gap: 31px; }
+  .gen-text { order: 1; }
+  /* кресло висит в верхней части экрана, текст — ниже */
   .reveal { padding-top: 60vh; min-height: 100vh; align-content: start; }
   .hero { display: flex; flex-direction: column; gap: 31px; }
   .hero { padding-top: 96px; }

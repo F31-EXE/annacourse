@@ -11,10 +11,10 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <!-- 3D-сцена: одна арка на весь сайт -->
+  <!-- 3D-сцена: одно кресло на весь сайт -->
   <div class="halo" id="halo" aria-hidden="true"></div>
   <canvas id="scene" aria-hidden="true"></canvas>
-  <div class="fallback-arch" aria-hidden="true"></div>
+  <div class="fallback-chair" aria-hidden="true"></div>
   <p class="prompt" id="prompt" aria-live="polite"></p>
 
   <header class="nav">
@@ -31,7 +31,7 @@
 
   <main>
     <!-- ============ 1. HERO ============ -->
-    <section class="hero" id="intro" data-pose="hero" data-mat="plaster">
+    <section class="hero" id="intro" data-pose="hero" data-mat="boucle">
       <div class="hero-lockup">
         <p class="label">Онлайн-курс для дизайнеров интерьера</p>
         <h1>Одна форма.<br>Сотня<br>вариантов.</h1>
@@ -59,32 +59,32 @@
     </section>
 
     <!-- ============ 2. ИДЕЯ ============ -->
-    <section class="reveal" id="idea" data-pose="idea" data-mat="travertine">
+    <section class="reveal" id="idea" data-pose="idea" data-mat="velvet">
       <h2>Не просто<br>нейросеть.</h2>
       <div class="spacer" aria-hidden="true"></div>
-      <p class="body">Это ваш новый инструмент, как карандаш или SketchUp. Форму, пропорции и замысел задаёте вы. Нейросеть за&nbsp;секунды примеряет к&nbsp;ним материалы, свет и&nbsp;настроение.</p>
+      <p class="body">Это ваш новый инструмент, как карандаш или SketchUp. Форму, пропорции и замысел задаёте вы. Нейросеть за&nbsp;секунды примеряет к&nbsp;ним ткани, фактуры, свет и&nbsp;настроение.</p>
     </section>
 
     <!-- ============ 3. МАТЕРИАЛЫ ============ -->
     <section class="reveal" id="materials" data-pose="materials" data-mat="choice">
       <div class="col">
         <h2>Форму<br>задаёте вы.</h2>
-        <p class="body">Варианты — работа ИИ. Выберите материал и посмотрите, как одна арка становится четырьмя разными интерьерами.</p>
+        <p class="body">Варианты — работа ИИ. Выберите обивку и посмотрите, как одно кресло попадает в&nbsp;четыре разных интерьера.</p>
       </div>
       <div class="spacer" aria-hidden="true"></div>
       <div class="col chips-col">
-        <p class="label">Материал</p>
-        <div class="chips" role="radiogroup" aria-label="Материал арки">
-          <button class="chip" role="radio" aria-checked="false" data-mat="plaster">Штукатурка</button>
-          <button class="chip" role="radio" aria-checked="false" data-mat="travertine">Травертин</button>
-          <button class="chip" role="radio" aria-checked="true" data-mat="walnut">Орех</button>
-          <button class="chip" role="radio" aria-checked="false" data-mat="terracotta">Терракота</button>
+        <p class="label">Обивка</p>
+        <div class="chips" role="radiogroup" aria-label="Обивка кресла">
+          <button class="chip" role="radio" aria-checked="false" data-mat="boucle">Букле</button>
+          <button class="chip" role="radio" aria-checked="false" data-mat="velvet">Бархат</button>
+          <button class="chip" role="radio" aria-checked="true" data-mat="leather">Кожа</button>
+          <button class="chip" role="radio" aria-checked="false" data-mat="linen">Лён</button>
         </div>
       </div>
     </section>
 
     <!-- ============ 4. ПРОГРАММА ============ -->
-    <section class="program" id="program" data-pose="program" data-mat="terracotta">
+    <section class="program" id="program" data-pose="program" data-mat="linen">
       <div class="program-list">
         <p class="label">Программа · 6 модулей · 8 недель</p>
         <h2>От мудборда<br>до презентации.</h2>
@@ -99,8 +99,31 @@
       </div>
     </section>
 
-    <!-- ============ 5. ЗАПИСЬ ============ -->
-    <section class="reveal join" id="join" data-pose="join" data-mat="plaster">
+    <!-- ============ 5. ЭСКИЗ → ГЕНЕРАЦИЯ ============ -->
+    <section class="gen" id="gen">
+      <div class="gen-text">
+        <p class="label">Работа из курса · модуль 02</p>
+        <h2>Из коллажа —<br>в рендер.</h2>
+        <p class="body">Коллаж собран из реальных предметов за вечер. Рендер нейросеть сделала за&nbsp;40&nbsp;секунд: геометрия, мебель и&nbsp;декор на&nbsp;своих местах, а&nbsp;свет и&nbsp;фактуры — как в&nbsp;фотосъёмке.</p>
+        <div class="gen-status">
+          <p class="gen-prompt" id="genPrompt"></p>
+          <div class="gen-meter"><span id="genBar"></span></div>
+          <p class="micro gen-step" id="genStep">Ожидание</p>
+        </div>
+        <button class="btn-ghost" id="genReplay" type="button">Сгенерировать ещё раз</button>
+      </div>
+
+      <figure class="gen-frame" id="genFrame">
+        <canvas id="genCanvas" aria-label="Коллаж интерьера превращается в фотореалистичный рендер"></canvas>
+        <span class="gen-tag gen-tag-l">ИИ-рендер</span>
+        <span class="gen-tag gen-tag-r">Коллаж</span>
+        <div class="gen-handle" id="genHandle" role="slider" tabindex="0" aria-label="Сравнить коллаж и рендер" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"></div>
+        <p class="gen-missing micro">Добавьте файлы img/collage.jpg и img/render.jpg</p>
+      </figure>
+    </section>
+
+    <!-- ============ 6. ЗАПИСЬ ============ -->
+    <section class="reveal join" id="join" data-pose="join" data-mat="boucle">
       <h2>Начните<br>с первого<br>урока.</h2>
       <div class="spacer" aria-hidden="true"></div>
       <div class="col">
@@ -124,5 +147,6 @@
 
   <script src="vendor/three.min.js"></script>
   <script src="main.js"></script>
+  <script src="gen.js"></script>
 </body>
 </html>
