@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Анна · ИИ для дизайнеров интерьера</title>
+  <meta name="description" content="Онлайн-курс: как дизайнеру интерьера встроить нейросети в работу — мудборды, визуализации из эскиза, презентации клиенту.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="nav">
+    <a class="logo" href="#">Анна<span>/ ai interior</span></a>
+    <nav class="nav-links">
+      <a href="#how">Как это работает</a>
+      <a href="#program">Программа</a>
+      <a href="#join" class="nav-cta">Записаться</a>
+    </nav>
+  </header>
+
+  <main>
+    <!-- ============ HERO ============ -->
+    <section class="hero">
+      <div class="hero-text">
+        <p class="eyebrow">Онлайн-курс · ИИ для дизайнеров интерьера</p>
+        <h1>Из эскиза —<br><em>в готовый интерьер</em><br>за минуты</h1>
+        <p class="lead">Научу встраивать нейросети в работу дизайнера: мудборды, визуализации из скетча и презентации, после которых клиенты говорят «да». Без потери авторского почерка.</p>
+        <div class="hero-actions">
+          <a href="#program" class="btn btn-primary">Смотреть программу</a>
+          <a href="#join" class="btn btn-ghost">Бесплатный урок</a>
+        </div>
+        <ul class="stats">
+          <li><b>12</b><span>лет в профессии</span></li>
+          <li><b>140+</b><span>реализованных проектов</span></li>
+          <li><b>900</b><span>учеников</span></li>
+        </ul>
+      </div>
+
+      <div class="stage" id="stage">
+        <svg viewBox="0 0 800 600" role="img" aria-label="Карандашный эскиз гостиной превращается в цветной интерьер">
+          <defs>
+            <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+              <path d="M20 0H0V20" fill="none" stroke="#3a3631" stroke-opacity=".06" stroke-width="1"/>
+            </pattern>
+            <filter id="pencil" x="-2%" y="-2%" width="104%" height="104%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="3"/>
+              <feDisplacementMap in="SourceGraphic" scale="2.6"/>
+            </filter>
+            <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+              <feGaussianBlur stdDeviation="7"/>
+            </filter>
+            <filter id="grain">
+              <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/>
+              <feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .07 0"/>
+            </filter>
+
+            <linearGradient id="gCeil" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F6F1EA"/><stop offset="1" stop-color="#EAE1D5"/></linearGradient>
+            <linearGradient id="gBack" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#EFE6DA"/><stop offset="1" stop-color="#E2D5C4"/></linearGradient>
+            <linearGradient id="gLeft" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#D3C4B0"/><stop offset="1" stop-color="#E4D8C8"/></linearGradient>
+            <linearGradient id="gRight" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#E7DCCD"/><stop offset="1" stop-color="#D2C2AD"/></linearGradient>
+            <linearGradient id="gFloor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#B0805A"/><stop offset="1" stop-color="#7A5134"/></linearGradient>
+            <linearGradient id="gSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#B7C7DE"/><stop offset=".55" stop-color="#F0D6BA"/><stop offset="1" stop-color="#F5BE8C"/></linearGradient>
+            <linearGradient id="gBeam" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFD9A6" stop-opacity=".55"/><stop offset="1" stop-color="#FFD9A6" stop-opacity="0"/></linearGradient>
+            <linearGradient id="gLinen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E6DCCD"/><stop offset="1" stop-color="#CDBEA8"/></linearGradient>
+            <linearGradient id="gSeat" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#DCD0BE"/><stop offset="1" stop-color="#BFAE97"/></linearGradient>
+            <linearGradient id="gArt" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#C2613F"/><stop offset="1" stop-color="#EBB67E"/></linearGradient>
+            <linearGradient id="gWood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7A563C"/><stop offset="1" stop-color="#5A3D29"/></linearGradient>
+            <linearGradient id="gClay" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#D6C3AC"/><stop offset="1" stop-color="#B49C80"/></linearGradient>
+            <radialGradient id="gGlow"><stop offset="0" stop-color="#FFE3B3" stop-opacity=".95"/><stop offset="1" stop-color="#FFE3B3" stop-opacity="0"/></radialGradient>
+            <radialGradient id="gWarm" cx=".5" cy=".42" r=".65"><stop offset="0" stop-color="#FFC98E" stop-opacity=".22"/><stop offset="1" stop-color="#5A3D29" stop-opacity=".16"/></radialGradient>
+            <linearGradient id="gScan" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#9AA7E6" stop-opacity="0"/><stop offset="1" stop-color="#9AA7E6" stop-opacity=".55"/></linearGradient>
+
+            <clipPath id="windowClip"><path d="M340 340V215A60 60 0 0 1 460 215V340Z"/></clipPath>
+            <clipPath id="reveal"><rect id="revealRect" x="0" y="0" width="0" height="600"/></clipPath>
+          </defs>
+
+          <!-- бумага -->
+          <rect width="800" height="600" fill="#FBF8F3"/>
+          <rect width="800" height="600" fill="url(#grid)"/>
+
+          <!-- слой эскиза -->
+          <g id="sketch" filter="url(#pencil)"></g>
+          <g id="notes" class="notes">
+            <path d="M560 300 q30 -30 70 -36" class="note-line"/>
+            <text x="636" y="262">диван, лён</text>
+            <path d="M465 190 q40 -10 70 -40" class="note-line"/>
+            <text x="540" y="146">арка 2,1 м</text>
+            <path d="M612 470 q40 2 66 -22" class="note-line"/>
+            <text x="664" y="440">ковёр, джут</text>
+            <text x="360" y="102" class="dim">4 200</text>
+          </g>
+
+          <!-- слой рендера -->
+          <g id="render" clip-path="url(#reveal)"></g>
+
+          <!-- сканер / разделитель -->
+          <rect id="scan" x="-90" y="0" width="90" height="600" fill="url(#gScan)" opacity="0"/>
+          <g id="divider" opacity="0">
+            <line x1="0" y1="0" x2="0" y2="600" stroke="#fff" stroke-width="2.5"/>
+            <circle cx="0" cy="300" r="19" fill="#fff" stroke="#1F1E1C" stroke-opacity=".12"/>
+            <path d="M-6 292l-7 8 7 8M6 292l7 8-7 8" fill="none" stroke="#1F1E1C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </g>
+        </svg>
+
+        <span class="tag tag-left">ИИ-рендер</span>
+        <span class="tag tag-right">Эскиз</span>
+
+        <div class="status" id="status" aria-live="polite">
+          <span class="dot"></span>
+          <span class="status-text" id="statusText">Рисуем эскиз…</span>
+          <code id="prompt"></code>
+        </div>
+
+        <button class="replay" id="replay" type="button" aria-label="Проиграть анимацию заново">↻</button>
+        <div class="handle-zone" id="handleZone" role="slider" tabindex="0" aria-label="Сравнить эскиз и рендер" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+      </div>
+    </section>
+
+    <!-- ============ HOW ============ -->
+    <section class="how" id="how">
+      <p class="eyebrow">Как это работает</p>
+      <h2>Ваш вкус + нейросеть = <em>скорость без компромиссов</em></h2>
+      <ol class="steps">
+        <li>
+          <span class="num">01</span>
+          <h3>Эскиз</h3>
+          <p>Рисуете от руки или берёте фото пустой комнаты. Задаёте пропорции, свет и композицию.</p>
+        </li>
+        <li>
+          <span class="num">02</span>
+          <h3>Промпт</h3>
+          <p>Описываете стиль, материалы и настроение на языке, который понимает ИИ. Дам готовые формулы.</p>
+        </li>
+        <li>
+          <span class="num ai">03</span>
+          <h3>Рендер</h3>
+          <p>Получаете 10 вариантов за 5 минут, выбираете лучший и дорабатываете под клиента.</p>
+        </li>
+      </ol>
+    </section>
+
+    <!-- ============ PROGRAM ============ -->
+    <section class="program" id="program">
+      <p class="eyebrow">Программа</p>
+      <h2>6 модулей — <em>от мудборда до презентации</em></h2>
+      <div class="modules">
+        <article><span>М1</span><h3>Мудборды за 10 минут</h3><p>Midjourney и аналоги: стиль, палитра, референсы.</p></article>
+        <article><span>М2</span><h3>Рендер из эскиза</h3><p>Как сохранить геометрию скетча и получить фотореализм.</p></article>
+        <article><span>М3</span><h3>Планировки с ИИ</h3><p>Варианты зонирования и быстрые проверки идей.</p></article>
+        <article><span>М4</span><h3>Материалы и свет</h3><p>Управляем фактурами, временем суток и атмосферой.</p></article>
+        <article><span>М5</span><h3>Презентация клиенту</h3><p>Собираем убедительную подачу и закрываем правки.</p></article>
+        <article><span>М6</span><h3>ИИ в рутине</h3><p>Сметы, ТЗ, переписка — освобождаем часы на творчество.</p></article>
+      </div>
+    </section>
+
+    <!-- ============ CTA ============ -->
+    <section class="join" id="join">
+      <h2>Попробуйте бесплатно</h2>
+      <p>Первый урок и PDF «50 промптов для интерьерных рендеров» — на почту.</p>
+      <form class="join-form" onsubmit="event.preventDefault(); this.classList.add('sent');">
+        <input type="email" required placeholder="Ваш email" aria-label="Email">
+        <button class="btn btn-primary" type="submit">Получить урок</button>
+        <p class="sent-msg">Готово! Проверьте почту ✦</p>
+      </form>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>© 2026 Анна · AI Interior</span>
+    <span>Telegram · Instagram · YouTube</span>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>
